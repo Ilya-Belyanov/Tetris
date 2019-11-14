@@ -1,11 +1,11 @@
 import random
 
 class Setting():
-    size_painter = 0
-    def __init__(self):
-        '''Настройки и параметры'''
-        self.board_h=15
-        self.board_w=10
+    '''Настройки'''
+    # Параметры поля
+    board_h = 15
+    board_w = 10
+
 
 
 class Tetro():
@@ -122,3 +122,5 @@ class Shape():
         return False
 
 
+if __name__ == "__main__":
+    print('It is module of settings for Tetris')

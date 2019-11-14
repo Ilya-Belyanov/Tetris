@@ -1,15 +1,16 @@
-from settings_tetris import Setting as st
-from settings_tetris import Shape,Tetro
+from settingsTetris import Setting as st
+from settingsTetris import Shape,Tetro
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QColor, QFont,QPen
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 
 class CurrentState(QtWidgets.QFrame):
     '''Рисует текущую фигуру'''
-    sett = st()
-    BoardH = sett.board_h
-    BoardW = sett.board_w
+    #sett = st()
+    BoardH = st.board_h
+    BoardW = st.board_w
+    widgetSize=0
     def __init__(self,parent):
         '''Создаем обьек Shape тот же, что и вглавном окне'''
         super().__init__(parent)
@@ -32,11 +33,15 @@ class CurrentState(QtWidgets.QFrame):
         elif self.curshape.shape==Tetro.Line:
             self.curshape.curx+=1
             self.curshape.cury+=1
-        elif self.curshape.shape==Tetro.zFigure:
+        elif self.curshape.shape==Tetro.zFigure :
             self.curshape.curx-=0.5
+
         elif self.curshape.shape==Tetro.lFigure:
             self.curshape.curx -=0.5
             self.curshape.cury += 1
+
+        elif  self.curshape.shape == Tetro.MirroredZFigure  or self.curshape.shape == Tetro.MirroredLShape:
+            self.curshape.curx += 0.5
 
 
         qp = QPainter()
@@ -45,7 +50,7 @@ class CurrentState(QtWidgets.QFrame):
         qp.end()
 
     def drawShape(self,qp):
-        size_paint = st.size_painter
+        size_paint = CurrentState.widgetSize
         colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
                       0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
 
@@ -57,9 +62,11 @@ class CurrentState(QtWidgets.QFrame):
 
 class Painter(QWidget):
     '''Класс ,рисующий основное окно'''
-    sett=st()
-    BoardH=sett.board_h
-    BoardW=sett.board_w
+    #sett=st()
+    BoardH=st.board_h
+    BoardW=st.board_w
+
+    msg2Statusbar = pyqtSignal(str)
 
     def __init__(self,parent):
         '''Создаем первую фигуру'''
@@ -70,6 +77,7 @@ class Painter(QWidget):
         self.clearBoard()
         self.curshape = Shape()
         self.newFigure()
+        msg2Statusbar = pyqtSignal(str)
 
     def clearBoard(self):
         '''Создаем чистое поле'''
@@ -84,7 +92,7 @@ class Painter(QWidget):
     def paintEvent(self,event):
         '''Рисуем фигуру'''
         size = self.size()
-        st.size_painter = size
+        CurrentState.widgetSize = size
         qp = QPainter()
         qp.begin(self)
         self.drawShape(qp,size)
@@ -264,11 +272,15 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.Vertical.setTitle(_translate("MainWindow", "Settings"))
+        self.Vertical.setTitle(_translate("MainWindow", "   Следующая фигура"))
         self.pushButton.setText(_translate("MainWindow", " Начать"))
+
+if __name__ == "__main__":
+    print('It is module for Tetris')
