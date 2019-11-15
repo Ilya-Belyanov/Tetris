@@ -1,56 +1,23 @@
-from PyQt5.QtWidgets import QWidget, QApplication,QToolTip, QWidget, QAction , QPushButton, QDialog
+from PyQt5.QtWidgets import QWidget, QApplication,QAction
 from PyQt5.QtCore import Qt,QBasicTimer, QCoreApplication
 from PyQt5 import QtGui
 from paintTetris import *
+from dialogWindows import *
 import sys
-from settingsTetris import Setting as st
-
-class Example(QDialog):
-    '''Диалоговое окно изменения размера'''
-    SizeSignal = pyqtSignal()
-    OutSignal = pyqtSignal()
-    def __init__(self):
-        super(Example, self).__init__()
-
-        self.initUI()
-
-    def initUI(self):
-        btn = QPushButton('Yes', self)
-        btn.clicked.connect(self.buttonYesClicked)
-        btn.resize(180, 40)
-        btn.move(20, 35)
-
-        qbtn = QPushButton('No', self)
-        qbtn.clicked.connect(self.buttonNoClicked)
-        qbtn.resize(180, 40)
-        qbtn.move(20, 80)
-
-        self.setWindowTitle('Test')
-
-    def buttonYesClicked(self):
-        st.board_h=20
-        st.board_w=25
-        self.SizeSignal.emit()
-        self.close()
-
-    def buttonNoClicked(self):
-        self.OutSignal.emit()
-        self.close()
-
 
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
         '''Создаем наше главное окно'''
         super(MyWindow,self).__init__()
-        self.setWindowTitle('Tetris')
-        self.setWindowIcon(QtGui.QIcon('Korn.jpg'))
+        self.setWindowTitle('Tetris 2.0               I1ya Be1yan0v')
+        self.setWindowIcon(QtGui.QIcon('Photo/TIcon.jpg'))
 
         self.ui=Ui_MainWindow()
         self.ui.setupUi(self)
         # Диалоговое окно Size
-        self.ex = Example()
+        self.ex = ChangeSize()
         self.ex.SizeSignal.connect(self.update_paint)
-        self.ex.OutSignal.connect(self.startTimeAgain)
+
 
         # Фокус на главное окно
         self.setChildrenFocusPolicy(QtCore.Qt.NoFocus)
@@ -67,10 +34,10 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.frame.update()
 
         # Верхняя панель
-        settings = QAction(QtGui.QIcon('Korn.jpg'), 'Size', self)
-        settings.setShortcut('Ctrl+O')
+        settings = QAction(QtGui.QIcon('Photo/Settings.jpg'), 'Size', self)
+        settings.setShortcut('Ctrl+S')
         settings.triggered.connect(self.showDialogSize)
-
+        settings.setStatusTip('Change size')
         fileMenu = self.ui.menubar.addMenu('&Settings')
         fileMenu.addAction(settings)
 
@@ -78,8 +45,9 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.widget.msg2Statusbar[str].connect(self.ui.statusbar.showMessage)
     def showDialogSize(self):
         ''' Диалог '''
+        self.ui.widget.pause = True
+        self.ui.widget.msg2Statusbar.emit(' Pause')
         self.timer.stop()
-        print(self.ui.widget.pause)
         self.ex.show()
 
     def startTimeAgain(self):
@@ -87,16 +55,13 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def update_paint(self):
         '''Обновляем поле'''
-        Painter.BoardH = st.board_h
-        Painter.BoardW = st.board_w
-        CurrentState.BoardH = st.board_h
-        CurrentState.BoardW= st.board_w
+        self.timer.stop()
 
         self.ui.widget.fail=False
         self.ui.widget.pause=False
         self.ui.widget.clearBoard()
         self.ui.widget.newFigure()
-        self.ui.widget.curshape.cury -= 1
+        self.ui.widget.update()
         self.ui.frame.curshape.shape = self.ui.widget.curshape.futureShape
         self.ui.frame.update()
         self.ui.widget.count=0
@@ -135,6 +100,10 @@ class MyWindow(QtWidgets.QMainWindow):
                     self.ui.widget.msg2Statusbar.emit(' Pause')
                 elif not self.ui.widget.fail:
                     self.startTimeAgain()
+        if key == Qt.Key_Escape:
+            # Закрытие
+            self.ex.close()
+            self.close()
 
     def timerEvent(self, event):
         '''Обновляем окна через t промежуток'''
@@ -168,6 +137,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 recursiveSetChildFocusPolicy(childQWidget)
 
         recursiveSetChildFocusPolicy(self)
+
+
 
 
 app=QtWidgets.QApplication([])

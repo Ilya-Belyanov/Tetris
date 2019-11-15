@@ -51,14 +51,16 @@ class CurrentState(QtWidgets.QFrame):
 
     def drawShape(self,qp):
         size_paint = CurrentState.widgetSize
-        colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
-                      0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
+        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
+                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
 
-        color = QColor(colorTable[self.curshape.shape])
+        color = QColor.fromRgb(colorTable[self.curshape.shape][0],colorTable[self.curshape.shape][1],
+                               colorTable[self.curshape.shape][2],colorTable[self.curshape.shape][3])
         for i in range(4):
             x = (size_paint.width()//CurrentState.BoardW) * (self.curshape.coords[i][0]+self.curshape.curx)
             y = (size_paint.height() //CurrentState.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
-            qp.fillRect(x, y, (size_paint.width() // CurrentState.BoardW)-1, (size_paint.height() // CurrentState.BoardH)-1, color)
+            qp.fillRect(x+1, y+1, (size_paint.width() // CurrentState.BoardW)-2, (size_paint.height() // CurrentState.BoardH)-2, color)
+
 
 class Painter(QWidget):
     '''Класс ,рисующий основное окно'''
@@ -81,6 +83,10 @@ class Painter(QWidget):
 
     def clearBoard(self):
         '''Создаем чистое поле'''
+        Painter.BoardH = st.board_h
+        Painter.BoardW = st.board_w
+        CurrentState.BoardH = st.board_h
+        CurrentState.BoardW = st.board_w
         self.board = []
         for i in range(Painter.BoardH):
             cols = []
@@ -101,29 +107,38 @@ class Painter(QWidget):
 
     def drawFall(self, qp,size):
         '''Ищет где рисовать оставшиеся фигуры'''
+        color = QtGui.QColor.fromRgb(75, 0, 130, 255)
+        pen = QtGui.QPen(color, 8, Qt.SolidLine)
+        qp.setPen(pen)
+        qp.drawRect(0, 0, self.size().width(), self.size().height())
 
         for i in range(Painter.BoardH):
             for j in range(Painter.BoardW):
                 if self.board[i][j] != Tetro.NoShape:
-                    colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
-                                  0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
+                    color=self.setColor(self.board[i][j])
 
-                    color = QColor(colorTable[self.board[i][j]])
                     x = (size.width() // Painter.BoardW) * j
                     y = (size.height() // Painter.BoardH) * i
-                    qp.fillRect(x, y , (size.width() // Painter.BoardW) - 1, (size.height() // Painter.BoardH) - 1,
+                    qp.fillRect(x+1, y+1 , (size.width() // Painter.BoardW) - 2, (size.height() // Painter.BoardH) - 2,
                                 color)
 
     def drawShape(self,qp,size):
         '''Рисует основную фигуру'''
-        colorTable = [0x000000, 0xCC6666, 0x66CC66, 0x6666CC,
-                      0xCCCC66, 0xCC66CC, 0x66CCCC, 0xDAAA00]
-
-        color = QColor(colorTable[self.curshape.shape])
+        color=self.setColor(self.curshape.shape)
         for i in range(4):
             x = (size.width()//Painter.BoardW) * (self.curshape.coords[i][0]+self.curshape.curx)
             y = (size.height() // Painter.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
-            qp.fillRect(x, y, (size.width() // Painter.BoardW)-1, (size.height() // Painter.BoardH)-1, color)
+            qp.fillRect(x+1, y+1, (size.width() // Painter.BoardW)-2, (size.height() // Painter.BoardH)-2, color)
+
+
+    def setColor(self,table):
+        '''Ставит цвета'''
+        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
+                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
+
+        color = QColor.fromRgb(colorTable[table][0],colorTable[table][1],
+                               colorTable[table][2],colorTable[table][3])
+        return color
 
     def gravity(self):
         '''Функция гравитации'''
@@ -278,7 +293,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Tetris 2.0  by I1ya Be1yan0v"))
         self.Vertical.setTitle(_translate("MainWindow", "   Следующая фигура"))
         self.pushButton.setText(_translate("MainWindow", " Начать"))
 
