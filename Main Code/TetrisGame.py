@@ -24,7 +24,11 @@ class MyWindow(QtWidgets.QMainWindow):
 
         # Создаем таймер
         self.timer = QBasicTimer()
-        self.timer.start(1000, self)
+        self.curSpeed=1000
+        self.timer.start(self.curSpeed, self)
+        #Таймер уровня
+        self.timerLevel = QBasicTimer()
+        self.timerLevel.start(20000, self)
 
         # Подключаем кнопку к обновлению фигуры
         self.ui.pushButton.clicked.connect(self.update_paint)
@@ -47,16 +51,26 @@ class MyWindow(QtWidgets.QMainWindow):
         ''' Диалог '''
         self.ui.widget.pause = True
         self.ui.widget.msg2Statusbar.emit(' Pause')
-        self.timer.stop()
+        self.stopTime()
         self.ex.show()
 
     def startTimeAgain(self):
-        self.timer.start(1000, self)
+        '''Восстановить время'''
+        self.timer.start(self.curSpeed, self)
+        self.timerLevel.start(20000, self)
+
+
+    def stopTime(self):
+        '''Остановить время'''
+        self.timer.stop()
+        self.timerLevel.stop()
+
 
     def update_paint(self):
         '''Обновляем поле'''
-        self.timer.stop()
+        self.stopTime()
 
+        self.curSpeed=1000
         self.ui.widget.fail=False
         self.ui.widget.pause=False
         self.ui.widget.clearBoard()
@@ -65,6 +79,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.frame.curshape.shape = self.ui.widget.curshape.futureShape
         self.ui.frame.update()
         self.ui.widget.count=0
+        self.ui.widget.curLevel=1
+
         self.startTimeAgain()
 
     def keyPressEvent(self, event):
@@ -96,7 +112,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 #Пауза
                 self.ui.widget.pause = not self.ui.widget.pause
                 if self.ui.widget.pause:
-                    self.timer.stop()
+                    self.stopTime()
                     self.ui.widget.msg2Statusbar.emit(' Pause')
                 elif not self.ui.widget.fail:
                     self.startTimeAgain()
@@ -107,10 +123,17 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def timerEvent(self, event):
         '''Обновляем окна через t промежуток'''
+        if event.timerId() == self.timerLevel.timerId():
+                self.curSpeed=self.curSpeed//1.2
+                self.ui.widget.curLevel+=1
+                self.startTimeAgain()
+
+
         if event.timerId() == self.timer.timerId():
+
             if self.ui.widget.fail:
                 self.ui.widget.msg2Statusbar.emit('Попробуйте еще')
-                self.timer.stop()
+                self.stopTime()
                 self.ui.lineEdit.setText('FAIL: Все очки- '+ str(self.ui.widget.count))
                 self.ui.pushButton.setText('Заново?')
             else:
@@ -126,8 +149,14 @@ class MyWindow(QtWidgets.QMainWindow):
         '''Устанавливаем текст на LineEdit'''
         text='Очки - '
         text+= str(self.ui.widget.count)
+
+        level='Уровень: '
+        level+=str(self.ui.widget.curLevel)
+
+        self.ui.lineEdit_1.setText(level)
         self.ui.lineEdit.setText(text)
         self.ui.pushButton.setText('Поехали')
+
 
     def setChildrenFocusPolicy(self, policy):
         '''Фокусируем нажатие на кнопки в главном окне'''

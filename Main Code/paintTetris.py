@@ -20,6 +20,9 @@ class CurrentState(QtWidgets.QFrame):
         self.curshape.curx=1
         self.curshape.cury=3
 
+        self.modeList = (1, 2, 3)
+        self.curMode = self.modeList[0]
+
     def paintEvent(self,event):
         '''Рисуем фигуру, что и на главном экране'''
         self.curshape.setShape(self.curshape.shape)
@@ -46,10 +49,12 @@ class CurrentState(QtWidgets.QFrame):
 
         qp = QPainter()
         qp.begin(self)
+        self.drawMode(qp)
         self.drawShape(qp)
         qp.end()
 
     def drawShape(self,qp):
+        '''Фигура'''
         size_paint = CurrentState.widgetSize
         colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
                       (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
@@ -61,6 +66,12 @@ class CurrentState(QtWidgets.QFrame):
             y = (size_paint.height() //CurrentState.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
             qp.fillRect(x+1, y+1, (size_paint.width() // CurrentState.BoardW)-2, (size_paint.height() // CurrentState.BoardH)-2, color)
 
+    def drawMode(self,qp):
+        '''Рисует фон'''
+        if self.curMode == 1:
+            pass
+        elif self.curMode == 2:
+            qp.fillRect(0, 0, self.size().width(), self.size().height(), QtGui.QColor.fromRgb(0, 255, 255, 255))
 
 class Painter(QWidget):
     '''Класс ,рисующий основное окно'''
@@ -76,10 +87,14 @@ class Painter(QWidget):
         self.fail=False
         self.pause=False
         self.count=0
+        self.curLevel = 1
         self.clearBoard()
         self.curshape = Shape()
         self.newFigure()
         msg2Statusbar = pyqtSignal(str)
+
+        self.modeList=(1,2,3)
+        self.curMode=self.modeList[0]
 
     def clearBoard(self):
         '''Создаем чистое поле'''
@@ -101,6 +116,7 @@ class Painter(QWidget):
         CurrentState.widgetSize = size
         qp = QPainter()
         qp.begin(self)
+        self.drawMode(qp)
         self.drawShape(qp,size)
         self.drawFall(qp,size)
         qp.end()
@@ -130,6 +146,14 @@ class Painter(QWidget):
             y = (size.height() // Painter.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
             qp.fillRect(x+1, y+1, (size.width() // Painter.BoardW)-2, (size.height() // Painter.BoardH)-2, color)
 
+    def drawMode(self,qp):
+        '''Рисует фон'''
+        if self.curMode==1:
+           pass
+
+        elif self.curMode==2:
+            qp.fillRect(0, 0, self.size().width(), self.size().height(), QtGui.QColor.fromRgb(0, 245, 245, 245))
+            qp.drawEllipse(QtCore.QRect(self.size().width()//Painter.BoardW,self.size().heigt()//Painter.BoardH,25,25))
 
     def setColor(self,table):
         '''Ставит цвета'''
@@ -223,7 +247,7 @@ class Painter(QWidget):
                 cols=self.board[y-i-1][j]
                 self.board[y-i][j]=cols
 
-        self.count+=len(self.board[0])
+        self.count+=(len(self.board[0])*self.curLevel)
 
 
 
@@ -258,7 +282,19 @@ class Ui_MainWindow(object):
         self.frame.setObjectName("frame")
         self.verticalLayout_2.addWidget(self.frame)
 
-        #Создаем Line
+        # Создаем Line1
+        self.lineEdit_1 = QtWidgets.QLineEdit(self.Vertical)
+        self.lineEdit_1.setEnabled(True)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.lineEdit_1.sizePolicy().hasHeightForWidth())
+        self.lineEdit_1.setSizePolicy(sizePolicy)
+        self.lineEdit_1.setText("")
+        self.lineEdit_1.setObjectName("lineEdit_1")
+        self.verticalLayout_2.addWidget(self.lineEdit_1, 0, QtCore.Qt.AlignHCenter)
+
+        #Создаем Line2
         self.lineEdit = QtWidgets.QLineEdit(self.Vertical)
         self.lineEdit.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
