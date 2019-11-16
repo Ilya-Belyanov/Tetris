@@ -8,6 +8,13 @@ First version, requiring improvement
 
 File 1: settingsTetris-settings for tetris and storage for "Figures"
 File 2: paintTetris - creature main windows 
-File 3: TetrisGame- chief file
+File 3: dialogWindows - creature dialog windows
+File 4: TetrisGame- chief file
+
+Control-> 
+Translate ( left <-, right ->, rotate right- up, rotate left- down, drop down-Space)
+Pause- Ctrl+P
+Settings/Size-Ctrl+S
+Exit-Escape 
 
 Goodluck!
