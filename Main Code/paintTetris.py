@@ -1,46 +1,43 @@
-from settingsTetris import Setting as st
-from settingsTetris import Shape,Tetro
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QColor, QFont,QPen
 from PyQt5.QtCore import Qt, pyqtSignal
 
+from settingsTetris import Setting as st
+from settingsTetris import Shape,Tetro
+
 class CurrentState(QtWidgets.QFrame):
-    '''Рисует текущую фигуру'''
-    #sett = st()
+    '''Draw Future shape'''
     BoardH = st.board_h
     BoardW = st.board_w
-    widgetSize=0
+    widgetSize = 0  # changing in Painter
     def __init__(self,parent):
-        '''Создаем обьек Shape тот же, что и вглавном окне'''
         super().__init__(parent)
-        self.currentcolor=0
+        self.currentcolor = 0
         self.curshape = Shape()
         self.curshape.setShape(self.curshape.shape)
-        self.curshape.curx=1
-        self.curshape.cury=3
+        self.curshape.curx = 1
+        self.curshape.cury = 3
 
         self.modeList = (1, 2, 3)
         self.curMode = self.modeList[0]
 
     def paintEvent(self,event):
-        '''Рисуем фигуру, что и на главном экране'''
         self.curshape.setShape(self.curshape.shape)
-        sirina=-self.curshape.checkMinSizeX()+self.curshape.checkMaxSizeX()+1
-        self.curshape.curx=(sirina//2)
+        meadle = -self.curshape.checkMinSizeX()+self.curshape.checkMaxSizeX()+1
+        self.curshape.curx = (meadle // 2)
         self.curshape.cury = 3
-        #Красивая расстановка
-        if self.curshape.shape==Tetro.Square:
-            self.curshape.curx+=0.5
-            self.curshape.cury+=1
-        elif self.curshape.shape==Tetro.Line:
-            self.curshape.curx+=1
-            self.curshape.cury+=1
-        elif self.curshape.shape==Tetro.zFigure :
-            self.curshape.curx-=0.5
+        #beauty componate
+        if self.curshape.shape == Tetro.Square:
+            self.curshape.curx += 0.5
+            self.curshape.cury += 1
+        elif self.curshape.shape == Tetro.Line:
+            self.curshape.curx += 1
+            self.curshape.cury += 1
+        elif self.curshape.shape == Tetro.zFigure :
+            self.curshape.curx -= 0.5
 
-        elif self.curshape.shape==Tetro.lFigure:
-            self.curshape.curx -=0.5
+        elif self.curshape.shape == Tetro.lFigure:
+            self.curshape.curx -= 0.5
             self.curshape.cury += 1
 
         elif  self.curshape.shape == Tetro.MirroredZFigure  or self.curshape.shape == Tetro.MirroredLShape:
@@ -54,7 +51,6 @@ class CurrentState(QtWidgets.QFrame):
         qp.end()
 
     def drawShape(self,qp):
-        '''Фигура'''
         size_paint = CurrentState.widgetSize
         colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
                       (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
@@ -67,37 +63,33 @@ class CurrentState(QtWidgets.QFrame):
             qp.fillRect(x+1, y+1, (size_paint.width() // CurrentState.BoardW)-2, (size_paint.height() // CurrentState.BoardH)-2, color)
 
     def drawMode(self,qp):
-        '''Рисует фон'''
         if self.curMode == 1:
             pass
         elif self.curMode == 2:
             qp.fillRect(0, 0, self.size().width(), self.size().height(), QtGui.QColor.fromRgb(0, 255, 255, 255))
 
-class Painter(QWidget):
-    '''Класс ,рисующий основное окно'''
-    #sett=st()
-    BoardH=st.board_h
-    BoardW=st.board_w
+class Painter(QtWidgets.QWidget):
+    '''Main window for drawing'''
+    BoardH = st.board_h
+    BoardW = st.board_w
 
     msg2Statusbar = pyqtSignal(str)
 
     def __init__(self,parent):
-        '''Создаем первую фигуру'''
         super().__init__(parent)
-        self.fail=False
-        self.pause=False
-        self.count=0
+        self.fail = False
+        self.pause = False
+        self.count = 0
         self.curLevel = 1
         self.clearBoard()
         self.curshape = Shape()
         self.newFigure()
         msg2Statusbar = pyqtSignal(str)
 
-        self.modeList=(1,2,3)
-        self.curMode=self.modeList[0]
+        self.modeList = (1,2,3)
+        self.curMode = self.modeList[0]
 
     def clearBoard(self):
-        '''Создаем чистое поле'''
         Painter.BoardH = st.board_h
         Painter.BoardW = st.board_w
         CurrentState.BoardH = st.board_h
@@ -110,8 +102,92 @@ class Painter(QWidget):
             self.board.append(cols)
 
 
+    def setColor(self,table):
+        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
+                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
+
+        color = QColor.fromRgb(colorTable[table][0],colorTable[table][1],
+                               colorTable[table][2],colorTable[table][3])
+        return color
+
+    def gravity(self):
+        newY = self.curshape.cury + 1 + self.curshape.checkMaxSizeY()
+        if newY < Painter.BoardH:
+            if not self.curshape.checkCollision(self.board,0, 1):
+                self.curshape.cury += 1
+            else:
+                self.recordShape()
+
+        else:
+            self.recordShape()
+
+
+    def drop(self):
+        while True:
+            newY = self.curshape.cury + 1 + self.curshape.checkMaxSizeY()
+            if newY < Painter.BoardH:
+                if not self.curshape.checkCollision(self.board,0,1):
+                    self.curshape.cury += 1
+                else:
+                    self.update()
+                    self.recordShape()
+                    break
+            else:
+                self.update()
+                self.recordShape()
+                break
+
+        self.update()
+
+    def tryMoveX(self,direction):
+        xRight = self.curshape.curx+direction+self.curshape.checkMaxSizeX()
+        xLeft = self.curshape.curx+direction+self.curshape.checkMinSizeX()
+        if xRight < Painter.BoardW and xLeft >= 0:
+            if not self.curshape.checkCollision(self.board,direction, 0):
+                self.curshape.curx += direction
+        self.update()
+
+
+    def newFigure(self):
+        self.curshape.setRandomShape()
+        self.curshape.setShape(self.curshape.shape)
+        self.curshape.curx = Painter.BoardW // 2
+        self.curshape.cury = -self.curshape.checkMinSizeY()
+        if self.curshape.checkCollision(self.board,0, 0):
+            self.fail = True
+
+
+    def recordShape(self):
+        for i in range(4):
+            x = (self.curshape.coords[i][0] + self.curshape.curx)
+            y = (self.curshape.coords[i][1] + self.curshape.cury)
+            self.board[y][x] = self.curshape.shape
+
+        self.checkFullLine()
+        self.newFigure()
+
+    def checkFullLine(self):
+        for i in range (len(self.board)):
+            count = 0
+            for j in range (len(self.board[0])):
+                if self.board[i][j] != Tetro.NoShape:
+                    count += 1
+            if count == len(self.board[0]):
+                self.removeFullLine(i)
+
+
+    def removeFullLine(self,y):
+        for i in range (y):
+            if self.board[y-i] == [[0,0] for i in range (len(self.board[0]))]:
+                break
+            for j in range(len(self.board[0])):
+                cols = self.board[y-i-1][j]
+                self.board[y-i][j] = cols
+
+        self.count += (len(self.board[0])*self.curLevel)
+
+
     def paintEvent(self,event):
-        '''Рисуем фигуру'''
         size = self.size()
         CurrentState.widgetSize = size
         qp = QPainter()
@@ -122,7 +198,7 @@ class Painter(QWidget):
         qp.end()
 
     def drawFall(self, qp,size):
-        '''Ищет где рисовать оставшиеся фигуры'''
+        '''Draw fall shape'''
         color = QtGui.QColor.fromRgb(75, 0, 130, 255)
         pen = QtGui.QPen(color, 8, Qt.SolidLine)
         qp.setPen(pen)
@@ -139,7 +215,7 @@ class Painter(QWidget):
                                 color)
 
     def drawShape(self,qp,size):
-        '''Рисует основную фигуру'''
+        '''Draw main shape'''
         color=self.setColor(self.curshape.shape)
         for i in range(4):
             x = (size.width()//Painter.BoardW) * (self.curshape.coords[i][0]+self.curshape.curx)
@@ -147,191 +223,14 @@ class Painter(QWidget):
             qp.fillRect(x+1, y+1, (size.width() // Painter.BoardW)-2, (size.height() // Painter.BoardH)-2, color)
 
     def drawMode(self,qp):
-        '''Рисует фон'''
-        if self.curMode==1:
+        if self.curMode == 1:
            pass
 
-        elif self.curMode==2:
+        elif self.curMode == 2:
             qp.fillRect(0, 0, self.size().width(), self.size().height(), QtGui.QColor.fromRgb(0, 245, 245, 245))
             qp.drawEllipse(QtCore.QRect(self.size().width()//Painter.BoardW,self.size().heigt()//Painter.BoardH,25,25))
 
-    def setColor(self,table):
-        '''Ставит цвета'''
-        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
-                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
 
-        color = QColor.fromRgb(colorTable[table][0],colorTable[table][1],
-                               colorTable[table][2],colorTable[table][3])
-        return color
-
-    def gravity(self):
-        '''Функция гравитации'''
-        newY = self.curshape.cury + 1 + self.curshape.checkMaxSizeY()
-        if newY < Painter.BoardH:
-            if not self.curshape.checkCollision(self.board,0, 1):
-                self.curshape.cury += 1
-            else:
-                self.recordShape()
-
-        else:
-            self.recordShape()
-
-
-
-    def drop(self):
-        '''Функция резкого падения '''
-        while True:
-            newY=self.curshape.cury+1+self.curshape.checkMaxSizeY()
-            if newY < Painter.BoardH:
-                if not self.curshape.checkCollision(self.board,0,1):
-                    self.curshape.cury+=1
-                else:
-                    self.update()
-                    self.recordShape()
-                    break
-            else:
-                self.update()
-                self.recordShape()
-                break
-
-        self.update()
-
-    def tryMoveX(self,direction):
-        '''Движение по X'''
-        xRight=self.curshape.curx+direction+self.curshape.checkMaxSizeX()
-        xLeft=self.curshape.curx+direction+self.curshape.checkMinSizeX()
-        if xRight < Painter.BoardW and xLeft >= 0:
-            if not self.curshape.checkCollision(self.board,direction, 0):
-                self.curshape.curx+=direction
-        self.update()
-
-
-    def newFigure(self):
-        '''Создание новой фигуры сверху'''
-        self.curshape.setRandomShape()
-        self.curshape.setShape(self.curshape.shape)
-        self.curshape.curx = Painter.BoardW // 2
-        self.curshape.cury = -self.curshape.checkMinSizeY()
-        if self.curshape.checkCollision(self.board,0, 0):
-            self.fail=True
-
-
-    def recordShape(self):
-        '''Запись в список упавших'''
-
-        for i in range(4):
-            x = (self.curshape.coords[i][0] + self.curshape.curx)
-            y = (self.curshape.coords[i][1] + self.curshape.cury)
-            self.board[y][x] = self.curshape.shape
-
-        self.checkFullLine()
-        self.newFigure()
-
-    def checkFullLine(self):
-        '''Ищем полную линию'''
-        for i in range (len(self.board)):
-            count=0
-            for j in range (len(self.board[0])):
-                if self.board[i][j] != Tetro.NoShape:
-                    count+=1
-            if count==len(self.board[0]):
-                self.removeFullLine(i)
-
-
-    def removeFullLine(self,y):
-        '''Удаляем полную линию'''
-        for i in range (y):
-            if self.board[y-i]== [[0,0] for i in range (len(self.board[0]))]:
-                break
-            for j in range(len(self.board[0])):
-                cols=self.board[y-i-1][j]
-                self.board[y-i][j]=cols
-
-        self.count+=(len(self.board[0])*self.curLevel)
-
-
-
-
-
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(766, 600)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
-        self.centralwidget.setObjectName("centralwidget")
-
-        # Наш Grid
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
-
-        # Наш правый виджет, где рисуем
-        self.widget = Painter(self.centralwidget)
-        self.widget.setObjectName("widget")
-        self.gridLayout.addWidget(self.widget, 0, 1, 1, 3)
-
-        # Создаем левый Layout
-        self.Vertical = QtWidgets.QGroupBox(self.centralwidget)
-        self.Vertical.setObjectName("Vertical")
-        self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.Vertical)
-        self.verticalLayout_2.setObjectName("verticalLayout_2")
-
-        # Создаем слева окно, где рисуем нынешнюю фигуру
-        self.frame = CurrentState(self.Vertical)
-        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame.setObjectName("frame")
-        self.verticalLayout_2.addWidget(self.frame)
-
-        # Создаем Line1
-        self.lineEdit_1 = QtWidgets.QLineEdit(self.Vertical)
-        self.lineEdit_1.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_1.sizePolicy().hasHeightForWidth())
-        self.lineEdit_1.setSizePolicy(sizePolicy)
-        self.lineEdit_1.setText("")
-        self.lineEdit_1.setObjectName("lineEdit_1")
-        self.verticalLayout_2.addWidget(self.lineEdit_1, 0, QtCore.Qt.AlignHCenter)
-
-        #Создаем Line2
-        self.lineEdit = QtWidgets.QLineEdit(self.Vertical)
-        self.lineEdit.setEnabled(True)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit.sizePolicy().hasHeightForWidth())
-        self.lineEdit.setSizePolicy(sizePolicy)
-        self.lineEdit.setText("")
-        self.lineEdit.setObjectName("lineEdit")
-        self.verticalLayout_2.addWidget(self.lineEdit, 0, QtCore.Qt.AlignHCenter)
-
-        # Создаем кнопку
-        self.pushButton = QtWidgets.QPushButton(self.Vertical)
-        self.pushButton.setObjectName("pushButton")
-        self.verticalLayout_2.addWidget(self.pushButton)
-
-        # Добавляем левый Layout в Grid
-        self.gridLayout.addWidget(self.Vertical, 0, 0, 1, 1)
-
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 766, 26))
-        self.menubar.setObjectName("menubar")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-
-
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Tetris 2.0  by I1ya Be1yan0v"))
-        self.Vertical.setTitle(_translate("MainWindow", "   Следующая фигура"))
-        self.pushButton.setText(_translate("MainWindow", " Начать"))
 
 if __name__ == "__main__":
     print('It is module for Tetris')

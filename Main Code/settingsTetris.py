@@ -1,8 +1,7 @@
 import random
 
 class Setting():
-    '''Настройки'''
-    # Параметры поля
+    '''Parameters of Frame'''
     board_h = 15
     board_w = 10
 
@@ -10,17 +9,16 @@ class Setting():
 
 class Tetro():
     '''  Набор фигур '''
-    NoShape=0
-    Square=1
-    Piramid=2
-    zFigure=3
-    Line=4
-    lFigure=5
+    NoShape = 0
+    Square = 1
+    Piramid = 2
+    zFigure = 3
+    Line = 4
+    lFigure = 5
     MirroredLShape = 6
-    MirroredZFigure=7
+    MirroredZFigure = 7
 
 class Shape():
-    '''Фигура'''
     coordsTable=(
             ((0,0),(0,0),(0,0),(0,0)),
             ((0,0),(-1,-1),(0,-1),(-1,0)),
@@ -32,7 +30,7 @@ class Shape():
             ((0, 0), (0, 1), (-1, 1), (-1, 2))
     )
     def __init__(self):
-        '''Инициализируем начальное положение и тип фигуры'''
+        '''Start coords and type of shape'''
         self.curx=0
         self.cury=0
         self.coords = [[0, 0] for i in range(4)]
@@ -41,7 +39,7 @@ class Shape():
         self.setRandomShape()
 
     def setShape(self,shape):
-        '''Устанавливаем координаты для фигуры'''
+        '''Set type of shape'''
         self.shape=shape
         table=Shape.coordsTable[self.shape]
         for i in range(4):
@@ -49,41 +47,39 @@ class Shape():
                 self.coords[i][j]=table[i][j]
 
     def setRandomShape(self):
-        '''Рандомизируем выбор фигуры'''
         self.shape=self.futureShape
         self.futureShape = random.randint(1, 7)
 
 
     def checkMaxSizeX(self):
-        '''Поиск Мах икса'''
+        '''Found max x'''
         maxX=[]
         for i in range(4):
             maxX.append(self.coords[i][0])
         return max(maxX)
 
     def checkMinSizeX(self):
-        '''Поиск Мin икса'''
+        '''Found min x'''
         minX=[]
         for i in range(4):
             minX.append(self.coords[i][0])
         return min(minX)
 
     def checkMinSizeY(self):
-        '''Поиск Мin y'''
+        '''Found min y'''
         minY=[]
         for i in range(4):
             minY.append(self.coords[i][1])
         return min(minY)
 
     def checkMaxSizeY(self):
-        '''Поиск Max y'''
+        '''Found max y'''
         maxY=[]
         for i in range(4):
             maxY.append(self.coords[i][1])
         return max(maxY)
 
     def rotateShape(self, direction,curshape,board):
-        '''Поворот фигуры'''
         if curshape.shape==Tetro.Square:
             return curshape.coords
         result=Shape()
@@ -96,7 +92,7 @@ class Shape():
             result.coords[i][1] = -curshape.coords[i][0] * direction
 
         st=Setting()
-        # Проверяем на нахождение за границей
+        # Check  border
         xRight = result.curx  + result.checkMaxSizeX()
         xLeft = result.curx  + result.checkMinSizeX()
 
@@ -113,7 +109,6 @@ class Shape():
             return curshape.coords
 
     def checkCollision(self,board,dopX,dopY):
-        '''Проверяем на столкновения'''
         for i in range(4):
             x=(self.coords[i][0]+self.curx)+dopX
             y=(self.coords[i][1]+self.cury)+dopY
