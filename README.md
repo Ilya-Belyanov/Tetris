@@ -1,20 +1,10 @@
 # Tetris
-Tetris Game for Soul
 
-Game Tetris for PC.
-Version 1.
-Developed by Ilya Belyanov, from man to man.
-First version, requiring improvement
+Left window draw next Shape, right window draw board with current shape.
 
-File 1: settingsTetris-settings for tetris and storage for "Figures"
-File 2: paintTetris - creature main windows 
-File 3: dialogWindows - creature dialog windows
-File 4: TetrisGame- chief file
-
-Control-> 
-Translate ( left <-, right ->, rotate right- up, rotate left- down, drop down-Space)
-Pause- Ctrl+P
-Settings/Size-Ctrl+S
-Exit-Escape 
-
-Goodluck!
+Movement:
+Arrows -> for move to right, <- move to left
+Arrows up and down for rotation shape
+Press P for Pause
+Press left button for restart
+Press menu Setting->Size for changing size of main window
