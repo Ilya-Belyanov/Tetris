@@ -14,7 +14,7 @@ class ChangeSize(QDialog):
         lb = QLabel('Choise height x width',self)
         radio = QRadioButton('15х10',self)
         radio.setChecked(True)
-        radio_2 = QRadioButton('17х12', self)
+        radio_2 = QRadioButton('18х12', self)
         radio_3 = QRadioButton('20х15', self)
         radio_4 = QRadioButton('25х20', self)
 
@@ -25,7 +25,7 @@ class ChangeSize(QDialog):
         self.radioGroup.addButton(radio_4)
         self.radioGroup.buttonClicked.connect(self.buttonYesClicked)
 
-        self.radioDict = {radio:'1510',radio_2:'1712',radio_3:'2015',radio_4:'2520'}
+        self.radioDict = {radio:'1510',radio_2:'1812',radio_3:'2015',radio_4:'2520'}
 
         layout = QVBoxLayout(self)
         layout.addWidget(lb)

@@ -28,20 +28,20 @@ class CurrentState(QtWidgets.QFrame):
         self.curshape.cury = 3
         #beauty componate
         if self.curshape.shape == Tetro.Square:
-            self.curshape.curx += 0.5
-            self.curshape.cury += 1
-        elif self.curshape.shape == Tetro.Line:
             self.curshape.curx += 1
             self.curshape.cury += 1
+        elif self.curshape.shape == Tetro.Line:
+            self.curshape.curx += 1.5
+            self.curshape.cury += 1
         elif self.curshape.shape == Tetro.zFigure :
-            self.curshape.curx -= 0.5
-
+            #self.curshape.curx -= 0.5
+            pass
         elif self.curshape.shape == Tetro.lFigure:
-            self.curshape.curx -= 0.5
+            #self.curshape.curx -= 0.5
             self.curshape.cury += 1
 
         elif  self.curshape.shape == Tetro.MirroredZFigure  or self.curshape.shape == Tetro.MirroredLShape:
-            self.curshape.curx += 0.5
+            self.curshape.curx += 1
 
 
         qp = QPainter()
@@ -52,8 +52,8 @@ class CurrentState(QtWidgets.QFrame):
 
     def drawShape(self,qp):
         size_paint = CurrentState.widgetSize
-        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
-                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
+        colorTable = ((0, 0, 0, 0), (200, 0, 0, 255), (0, 255, 0, 255), (0, 0, 205, 255),
+                      (230, 230, 0, 255), (153, 50, 204, 255), (72, 61, 139, 255), (230, 140, 0, 255))
 
         color = QColor.fromRgb(colorTable[self.curshape.shape][0],colorTable[self.curshape.shape][1],
                                colorTable[self.curshape.shape][2],colorTable[self.curshape.shape][3])
@@ -68,7 +68,7 @@ class CurrentState(QtWidgets.QFrame):
         elif self.curMode == 2:
             qp.fillRect(0, 0, self.size().width(), self.size().height(), QtGui.QColor.fromRgb(0, 255, 255, 255))
 
-class Painter(QtWidgets.QWidget):
+class Painter(QtWidgets.QFrame):
     '''Main window for drawing'''
     BoardH = st.board_h
     BoardW = st.board_w
@@ -103,8 +103,8 @@ class Painter(QtWidgets.QWidget):
 
 
     def setColor(self,table):
-        colorTable = ((0, 0, 0, 0), (200, 0, 0, 230), (0, 255, 0, 230), (0, 0, 205, 230),
-                      (230, 230, 0, 230), (153, 50, 204, 230), (72, 61, 139, 230), (230, 140, 0, 230))
+        colorTable = ((0, 0, 0, 0), (200, 0, 0, 255), (0, 255, 0, 255), (0, 0, 205, 255),
+                      (230, 230, 0, 255), (153, 50, 204, 255), (72, 61, 139, 255), (230, 140, 0, 255))
 
         color = QColor.fromRgb(colorTable[table][0],colorTable[table][1],
                                colorTable[table][2],colorTable[table][3])
@@ -192,35 +192,55 @@ class Painter(QtWidgets.QWidget):
         CurrentState.widgetSize = size
         qp = QPainter()
         qp.begin(self)
+        self.drawGrid(qp,size)
         self.drawMode(qp)
         self.drawShape(qp,size)
         self.drawFall(qp,size)
         qp.end()
 
+    def drawGrid(self,qp,size):
+        color = QtGui.QColor.fromRgb(70, 70, 70, 255)
+        pen = QtGui.QPen(color, 5, Qt.SolidLine)
+        qp.setPen(pen)
+        qp.fillRect(0, 0, (size.width() // Painter.BoardW) * Painter.BoardW,
+                    (size.height() // Painter.BoardH) * Painter.BoardH, color)
+        
+        color = QtGui.QColor.fromRgb(0, 0, 0, 255)
+        pen = QtGui.QPen(color,0.2, QtCore.Qt.SolidLine)
+        pen.setStyle(Qt.DashLine)
+        qp.setPen(pen)
+
+        for j in range(Painter.BoardH + 1):
+                y = j * (size.height() // Painter.BoardH)
+                qp.drawLine(0,y,size.width(),y)
+
+        for i in range(Painter.BoardW + 1):
+                x = i * (size.width() // Painter.BoardW)
+                qp.drawLine(x,0,x,size.height())
+
+
     def drawFall(self, qp,size):
         '''Draw fall shape'''
-        color = QtGui.QColor.fromRgb(75, 0, 130, 255)
-        pen = QtGui.QPen(color, 8, Qt.SolidLine)
-        qp.setPen(pen)
-        qp.drawRect(0, 0, self.size().width(), self.size().height())
+
 
         for i in range(Painter.BoardH):
             for j in range(Painter.BoardW):
                 if self.board[i][j] != Tetro.NoShape:
-                    color=self.setColor(self.board[i][j])
+                    color = self.setColor(self.board[i][j])
 
                     x = (size.width() // Painter.BoardW) * j
                     y = (size.height() // Painter.BoardH) * i
-                    qp.fillRect(x+1, y+1 , (size.width() // Painter.BoardW) - 2, (size.height() // Painter.BoardH) - 2,
+                    qp.fillRect(x+1, y+1 , (size.width() / Painter.BoardW) - 2, (size.height() / Painter.BoardH) - 2,
                                 color)
 
     def drawShape(self,qp,size):
         '''Draw main shape'''
-        color=self.setColor(self.curshape.shape)
+        color = self.setColor(self.curshape.shape)
         for i in range(4):
-            x = (size.width()//Painter.BoardW) * (self.curshape.coords[i][0]+self.curshape.curx)
-            y = (size.height() // Painter.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
-            qp.fillRect(x+1, y+1, (size.width() // Painter.BoardW)-2, (size.height() // Painter.BoardH)-2, color)
+            x = int(size.width()/Painter.BoardW) * (self.curshape.coords[i][0]+self.curshape.curx)
+            y = int(size.height()/ Painter.BoardH) * (self.curshape.coords[i][1]+self.curshape.cury)
+            qp.fillRect(x + 1, y +1, (size.width() / Painter.BoardW) -2, (size.height() / Painter.BoardH) -2, color)
+
 
     def drawMode(self,qp):
         if self.curMode == 1:

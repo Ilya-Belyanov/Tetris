@@ -4,7 +4,7 @@ from paintTetris import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(666, 600)
+        MainWindow.setGeometry(QtCore.QRect(350, 200, 700, 735))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -74,7 +74,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Tetris 2.0  by I1ya Be1yan0v"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Tetris"))
         self.Vertical.setTitle(_translate("MainWindow", "   Next Shape"))
         self.pushButton.setText(_translate("MainWindow", " Start"))
 
