@@ -30,14 +30,18 @@ class CurrentState(QtWidgets.QFrame):
         if self.curshape.shape == Tetro.Square:
             self.curshape.curx += 1
             self.curshape.cury += 1
+
+        elif self.curshape.shape == Tetro.Piramid:
+            self.curshape.curx += 0.5
+
         elif self.curshape.shape == Tetro.Line:
             self.curshape.curx += 1.5
             self.curshape.cury += 1
         elif self.curshape.shape == Tetro.zFigure :
-            #self.curshape.curx -= 0.5
+            #self.curshape.curx += 0.5
             pass
         elif self.curshape.shape == Tetro.lFigure:
-            #self.curshape.curx -= 0.5
+            #self.curshape.curx += 0.5
             self.curshape.cury += 1
 
         elif  self.curshape.shape == Tetro.MirroredZFigure  or self.curshape.shape == Tetro.MirroredLShape:
@@ -199,7 +203,7 @@ class Painter(QtWidgets.QFrame):
         qp.end()
 
     def drawGrid(self,qp,size):
-        color = QtGui.QColor.fromRgb(70, 70, 70, 255)
+        color = QtGui.QColor.fromRgb(50, 50, 50, 255)
         pen = QtGui.QPen(color, 5, Qt.SolidLine)
         qp.setPen(pen)
         qp.fillRect(0, 0, (size.width() // Painter.BoardW) * Painter.BoardW,
@@ -221,8 +225,6 @@ class Painter(QtWidgets.QFrame):
 
     def drawFall(self, qp,size):
         '''Draw fall shape'''
-
-
         for i in range(Painter.BoardH):
             for j in range(Painter.BoardW):
                 if self.board[i][j] != Tetro.NoShape:

@@ -9,6 +9,12 @@ class ChangeSize(QDialog):
     def __init__(self):
         super(ChangeSize, self).__init__()
         self.initUI()
+        self.loadStyle()
+
+    def loadStyle(self):
+        styledialog = "static/styledialog.css"
+        with open(styledialog, "r") as f:
+            self.setStyleSheet(f.read())
 
     def initUI(self):
         lb = QLabel('Choise height x width',self)
@@ -49,14 +55,3 @@ class ChangeSize(QDialog):
         self.SizeSignal.emit()
         self.close()
 
-    def paintEvent(self,event):
-        qp = QtGui.QPainter()
-        qp.begin(self)
-        self.drawWindow(qp)
-        qp.end()
-
-    def drawWindow(self,qp):
-        color = QtGui.QColor.fromRgb(75,0,130,255)
-        pen = QtGui.QPen(color,8,Qt.SolidLine)
-        qp.setPen(pen)
-        qp.drawRect(0,0,self.size().width(),self.size().height())

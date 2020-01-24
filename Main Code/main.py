@@ -47,16 +47,12 @@ class MyWindow(QtWidgets.QMainWindow):
         # Сигнал в статусбар
         self.ui.widget.msg2Statusbar[str].connect(self.ui.statusbar.showMessage)
 
-        self.setStyleProgramm()
+        self.loadStyleSheets()
 
-    def setStyleProgramm(self):
-        #self.ui.widget.setStyleSheet('background-color: rgb(70,70,70)')
-        self.ui.frame.setStyleSheet('background-color: rgb(70,70,70)')
-        self.ui.centralwidget.setStyleSheet('background-color: rgb(200,200,200)')
-        self.ui.statusbar.setStyleSheet('background-color: rgb(200,200,200)')
-
-        self.ui.lineEdit_1.setFont(QtGui.QFont('Lucida Bright', 10))
-        self.ui.lineEdit.setFont(QtGui.QFont('Lucida Bright', 10))
+    def loadStyleSheets(self):
+        style = "static/style.css"
+        with open(style, "r") as f:
+            self.setStyleSheet(f.read())
 
     def showDialogSize(self):
         self.ui.widget.pause = True
