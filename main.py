@@ -1,38 +1,34 @@
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QWidget, QApplication,QAction
-from PyQt5.QtCore import Qt,QBasicTimer, QCoreApplication
-from PyQt5 import QtGui
-from windowTetris import Ui_MainWindow
+from PyQt5.QtWidgets import QWidget, QAction
+from PyQt5.QtCore import QBasicTimer
 from dialogWindows import *
+from windowTetris import Ui_MainWindow
 import sys
+
 
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        '''Create main window'''
-        super(MyWindow,self).__init__()
+        super(MyWindow, self).__init__()
         self.setWindowTitle('Tetris')
         self.setWindowIcon(QtGui.QIcon('Photo/TIcon.jpg'))
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        # Dialog window Size
-        self.ex = ChangeSize()
-        self.ex.SizeSignal.connect(self.update_paint)
 
-        # Focus on the main window
+        self.ex = ChangeSize()
+        self.ex.SizeSignal.connect(self.updateFrame)
+
         self.setChildrenFocusPolicy(QtCore.Qt.NoFocus)
 
-        # Create timer
         self.timer = QBasicTimer()
         self.curSpeed = 1000
         self.timer.start(self.curSpeed, self)
-        # Timer level
+
         self.timerLevel = QBasicTimer()
         self.timerLevel.start(20000, self)
 
-        self.ui.pushButton.clicked.connect(self.update_paint)
+        self.ui.pushButton.clicked.connect(self.updateFrame)
 
-        #Сразу устанавливаем что рисовать в левом окне
         self.ui.frame.curshape.shape = self.ui.widget.curshape.futureShape
         self.ui.frame.update()
 
@@ -44,7 +40,6 @@ class MyWindow(QtWidgets.QMainWindow):
         fileMenu = self.ui.menubar.addMenu('&Settings')
         fileMenu.addAction(settings)
 
-        # Сигнал в статусбар
         self.ui.widget.msg2Statusbar[str].connect(self.ui.statusbar.showMessage)
 
         self.loadStyleSheets()
@@ -64,14 +59,11 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer.start(self.curSpeed, self)
         self.timerLevel.start(20000, self)
 
-
     def stopTime(self):
         self.timer.stop()
         self.timerLevel.stop()
 
-
-    def update_paint(self):
-        '''Update Frame'''
+    def updateFrame(self):
         self.stopTime()
 
         self.curSpeed = 1000
@@ -89,54 +81,51 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def keyPressEvent(self, event):
         key = event.key()
-        if  self.ui.widget.fail or self.ui.widget.pause:
+        if self.ui.widget.fail or self.ui.widget.pause:
             pass
         if not self.ui.widget.fail and not self.ui.widget.pause:
-            # Drop down
-            if key == Qt.Key_Space:
+            if key == QtCore.Qt.Key_Space:
                 self.ui.widget.drop()
 
-            # Move to right and to left
-            if key == Qt.Key_Right:
+            if key == QtCore.Qt.Key_Right:
                 self.ui.widget.tryMoveX(1)
 
-            if key == Qt.Key_Left:
+            if key == QtCore.Qt.Key_Left:
                 self.ui.widget.tryMoveX(-1)
 
-            # Made rotate
-            if key == Qt.Key_Down:
-                self.ui.widget.curshape.coords = self.ui.widget.curshape.rotateShape(1,self.ui.widget.curshape,self.ui.widget.board)
+            if key == QtCore.Qt.Key_Down:
+                self.ui.widget.curshape.coords = self.ui.widget.curshape.rotateShape(1, self.ui.widget.curshape,
+                                                                                     self.ui.widget.board)
                 self.ui.widget.update()
-            if key == Qt.Key_Up:
-                self.ui.widget.curshape.coords = self.ui.widget.curshape.rotateShape(-1,self.ui.widget.curshape,self.ui.widget.board)
+            if key == QtCore.Qt.Key_Up:
+                self.ui.widget.curshape.coords = self.ui.widget.curshape.rotateShape(-1, self.ui.widget.curshape,
+                                                                                     self.ui.widget.board)
                 self.ui.widget.update()
 
-        if key == Qt.Key_P:
-                # Pause
-                self.ui.widget.pause = not self.ui.widget.pause
-                if self.ui.widget.pause:
-                    self.stopTime()
-                    self.ui.widget.msg2Statusbar.emit(' Pause')
-                elif not self.ui.widget.fail:
-                    self.startTimeAgain()
-        if key == Qt.Key_Escape:
+        if key == QtCore.Qt.Key_P:
+            self.ui.widget.pause = not self.ui.widget.pause
+            if self.ui.widget.pause:
+                self.stopTime()
+                self.ui.widget.msg2Statusbar.emit(' Pause')
+            elif not self.ui.widget.fail:
+                self.startTimeAgain()
+
+        if key == QtCore.Qt.Key_Escape:
             self.ex.close()
             self.close()
 
     def timerEvent(self, event):
-        '''Update Level and Frame'''
         if event.timerId() == self.timerLevel.timerId():
-                self.curSpeed=self.curSpeed//1.2
-                self.ui.widget.curLevel+=1
-                self.startTimeAgain()
-
+            self.curSpeed = self.curSpeed // 1.2
+            self.ui.widget.curLevel += 1
+            self.startTimeAgain()
 
         if event.timerId() == self.timer.timerId():
 
             if self.ui.widget.fail:
                 self.ui.widget.msg2Statusbar.emit('Try Again')
                 self.stopTime()
-                self.ui.lineEdit.setText('FAIL: All count - '+ str(self.ui.widget.count))
+                self.ui.lineEdit.setText('FAIL: All count - ' + str(self.ui.widget.count))
                 self.ui.pushButton.setText('Return?')
             else:
                 self.ui.widget.msg2Statusbar.emit('Game Start!')
@@ -147,7 +136,6 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.ui.frame.update()
 
     def setTextLine(self):
-        '''Stand text on  LineEdit'''
         text = 'Count - '
         text += str(self.ui.widget.count)
 
@@ -158,9 +146,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ui.lineEdit.setText(text)
         self.ui.pushButton.setText('GO')
 
-
     def setChildrenFocusPolicy(self, policy):
-        '''Focus on the main window'''
         def recursiveSetChildFocusPolicy(parentQWidget):
             for childQWidget in parentQWidget.findChildren(QWidget):
                 childQWidget.setFocusPolicy(policy)
@@ -169,12 +155,7 @@ class MyWindow(QtWidgets.QMainWindow):
         recursiveSetChildFocusPolicy(self)
 
 
-
-
 app = QtWidgets.QApplication([])
 application = MyWindow()
 application.show()
 sys.exit(app.exec())
-
-
-

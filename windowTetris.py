@@ -1,5 +1,5 @@
-from PyQt5 import QtCore, QtWidgets
 from paintTetris import *
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -18,7 +18,6 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -81,5 +80,3 @@ class Ui_MainWindow(object):
         self.Vertical.setTitle(_translate("MainWindow", "   Next Shape"))
         self.pushButton.setText(_translate("MainWindow", " Start"))
 
-if __name__ == "__main__":
-    print('It is module for Tetris')
